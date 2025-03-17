@@ -1,0 +1,96 @@
+CREATE DACREATE DATABASE oficina;
+USE oficina;
+
+-- Tabela Cliente
+CREATE TABLE cliente (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    CPF VARCHAR(20) UNIQUE NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    endereco VARCHAR(50) NOT NULL
+);
+
+-- Tabela Ordem de Serviço 
+CREATE TABLE ordem_de_servico (
+    id_ordem INT AUTO_INCREMENT PRIMARY KEY,
+    data_emissao DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    data_conclusao DATE
+);
+
+-- Tabela Veículos
+CREATE TABLE veiculos (
+    id_veiculo INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    placa VARCHAR(20) UNIQUE NOT NULL,
+    modelo VARCHAR(20) NOT NULL,
+    marca VARCHAR(20) NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente) ON DELETE CASCADE
+);
+
+-- Detalhamento Ordem <-> Serviço
+CREATE TABLE detalhe_ordem_servico (
+    id_ordem_servico INT AUTO_INCREMENT PRIMARY KEY,
+    id_ordem INT NOT NULL,
+    quantidade_servico INT NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_ordem) REFERENCES ordem_de_servico(id_ordem) ON DELETE CASCADE
+);
+
+-- Tabela Serviço
+CREATE TABLE servico (
+    id_servico INT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(50) NOT NULL
+);
+
+-- Tabela de Valor das Peças
+CREATE TABLE pecas (
+    id_peca INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL
+);
+
+-- Detalhamento Ordem <-> Serviço <-> Peça
+CREATE TABLE detalhe_ordem_servico_peca (
+    id_servico INT NOT NULL,
+    id_ordem_servico INT NOT NULL,
+    id_peca INT NOT NULL,
+    quantidade INT NOT NULL,
+    PRIMARY KEY (id_servico, id_ordem_servico, id_peca), 
+    FOREIGN KEY (id_servico) REFERENCES servico(id_servico) ON DELETE CASCADE,
+    FOREIGN KEY (id_ordem_servico) REFERENCES detalhe_ordem_servico(id_ordem_servico) ON DELETE CASCADE,
+    FOREIGN KEY (id_peca) REFERENCES pecas(id_peca) ON DELETE CASCADE
+);
+
+-- Tabela Mecânicos
+CREATE TABLE mecanicos (
+    id_mecanico INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    endereco VARCHAR(50) NOT NULL,
+    especialidade VARCHAR(30) NOT NULL
+);
+
+-- Relacionamento Equipe <-> Mecânico
+CREATE TABLE equipe (
+    id_equipe INT AUTO_INCREMENT PRIMARY KEY,
+    nome_equipe VARCHAR(50) NOT NULL
+);
+
+-- Relacionamento Equipe <-> Mecânicos
+CREATE TABLE equipe_mecanico (
+    id_equipe INT NOT NULL,
+    id_mecanico INT NOT NULL,
+    PRIMARY KEY (id_equipe, id_mecanico),
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe) ON DELETE CASCADE,
+    FOREIGN KEY (id_mecanico) REFERENCES mecanicos(id_mecanico) ON DELETE CASCADE
+);
+
+-- Relacionamento Equipe <-> Ordem
+CREATE TABLE equipe_ordem (
+    id_equipe INT NOT NULL,
+    id_ordem INT NOT NULL,
+    PRIMARY KEY (id_equipe, id_ordem),
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe) ON DELETE CASCADE,
+    FOREIGN KEY (id_ordem) REFERENCES ordem_de_servico(id_ordem) ON DELETE CASCADE
+);
+
